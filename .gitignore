@@ -29,3 +29,9 @@ Thumbs.db
 
 # Prisma
 prisma/dev.db
+
+
+# AI assistant files
+.claude/
+.windsurf/
+.agents/
