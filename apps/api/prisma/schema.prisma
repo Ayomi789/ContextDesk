@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  AGENT
+}
+
+enum TicketStatus {
+  NEW
+  IN_PROGRESS
+  WAITING
+  RESOLVED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(AGENT)
+
+  assignedTickets Ticket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id     String @id @default(cuid())
+  name   String
+  domain String @unique
+  tier   String
+
+  contacts Contact[]
+  tickets  Ticket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contact {
+  id    String  @id @default(cuid())
+  name  String
+  email String  @unique
+  notes String?
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id])
+
+  tickets Ticket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ticket {
+  id      String @id @default(cuid())
+  subject String
+
+  status   TicketStatus   @default(NEW)
+  priority TicketPriority @default(MEDIUM)
+
+  contactId String
+  accountId String
+
+  assigneeId String?
+
+  contact Contact @relation(fields: [contactId], references: [id])
+  account Account @relation(fields: [accountId], references: [id])
+
+  assignee User? @relation(fields: [assigneeId], references: [id])
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id   String @id @default(cuid())
+  body String
+
+  isInternalNote Boolean @default(false)
+
+  ticketId String
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  label String @unique
+}
