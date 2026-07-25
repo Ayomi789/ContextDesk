@@ -16,17 +16,15 @@ export function authenticate(
 
     const token = authHeader.split(" ")[1];
 
-const payload = verifyToken(token) as {
-    userId: string;
-    role: string;
+    const payload = verifyToken(token) as {
+      userId: string;
+      role: string;
     };
 
-req.user = {
-    userId: payload.userId,
-    role: payload.role,
+    req.user = {
+      userId: payload.userId,
+      role: payload.role,
     };
-
-next();
 
     next();
   } catch {

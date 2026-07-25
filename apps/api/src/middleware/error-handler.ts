@@ -18,6 +18,7 @@ export function errorHandler(
 
   return res.status(500).json({
     success: false,
-    message: "Internal Server Error",
+    message: err.message,
+    stack: err.stack,
   });
 }
