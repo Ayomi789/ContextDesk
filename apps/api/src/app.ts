@@ -8,6 +8,7 @@ import accountRoutes from "./routes/account.routes";
 
 import { notFound } from "./middleware/not-found";
 import { errorHandler } from "./middleware/error-handler";
+import contactRoutes from "./routes/contact.routes";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/accounts", accountRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/protected", protectedRoutes);
+app.use("/api/v1/contacts", contactRoutes);
 // 404 handler
 app.use(notFound);
 
