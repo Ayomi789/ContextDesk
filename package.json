@@ -1,0 +1,26 @@
+{
+  "name": "contextdesk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered CRM ticketing platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "echo \"Apps not scaffolded yet\"",
+    "build": "echo \"Build script coming soon\"",
+    "lint": "echo \"Lint script coming soon\"",
+    "format": "echo \"Format script coming soon\""
+  },
+  "keywords": [
+    "crm",
+    "ticketing",
+    "ai",
+    "typescript",
+    "react",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT"
+}
