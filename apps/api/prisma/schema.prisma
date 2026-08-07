@@ -40,6 +40,8 @@ model User {
 
   assignedTickets Ticket[]
 
+  messages Message[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -103,6 +105,10 @@ model Message {
 
   ticketId String
   ticket   Ticket @relation(fields: [ticketId], references: [id])
+
+
+  authorId String
+  author   User @relation(fields: [authorId], references: [id])
 
   createdAt DateTime @default(now())
 }

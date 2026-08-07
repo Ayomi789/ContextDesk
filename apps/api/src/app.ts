@@ -10,6 +10,9 @@ import ticketRoutes from "./routes/ticket.routes";
 import { notFound } from "./middleware/not-found";
 import { errorHandler } from "./middleware/error-handler";
 import contactRoutes from "./routes/contact.routes";
+import messageRoutes from "./routes/message.routes";
+
+
 
 const app = express();
 
@@ -23,6 +26,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/protected", protectedRoutes);
 app.use("/api/v1/tickets", ticketRoutes);
 app.use("/api/v1/contacts", contactRoutes);
+app.use("/api/v1/messages", messageRoutes);
 // 404 handler
 app.use(notFound);
 

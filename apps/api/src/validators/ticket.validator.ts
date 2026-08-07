@@ -8,4 +8,8 @@ export const createTicketSchema = z.object({
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
 });
 
+export const updateTicketSchema = createTicketSchema.partial();
+
+export type UpdateTicketInput = z.infer<typeof updateTicketSchema>;
+
 export type CreateTicketInput = z.infer<typeof createTicketSchema>;
