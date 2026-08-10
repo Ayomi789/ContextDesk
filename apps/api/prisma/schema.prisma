@@ -41,6 +41,7 @@ model User {
   assignedTickets Ticket[]
 
   messages Message[]
+  notifications Notification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -92,28 +93,49 @@ model Ticket {
   assignee User? @relation(fields: [assigneeId], references: [id])
 
   messages Message[]
+  notifications Notification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Message {
-  id   String @id @default(cuid())
-  body String
+  id             String            @id @default(cuid())
+  body           String
+  isInternalNote Boolean           @default(false)
+  senderType     MessageSenderType @default(AGENT)
 
-  isInternalNote Boolean @default(false)
+  ticketId       String
+  ticket         Ticket            @relation(fields: [ticketId], references: [id])
 
-  ticketId String
-  ticket   Ticket @relation(fields: [ticketId], references: [id])
+  authorId       String?
+  author         User?             @relation(fields: [authorId], references: [id])
 
-
-  authorId String
-  author   User @relation(fields: [authorId], references: [id])
-
-  createdAt DateTime @default(now())
+  createdAt      DateTime          @default(now())
 }
 
 model Tag {
   id    String @id @default(cuid())
   label String @unique
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  type        String
+  read        Boolean  @default(false)
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  ticketId    String?
+  ticket      Ticket?  @relation(fields: [ticketId], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+enum MessageSenderType {
+  AGENT
+  CUSTOMER
 }

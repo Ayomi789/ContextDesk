@@ -2,6 +2,64 @@ import { prisma } from "../lib/prisma";
 import { ApiError } from "../utils/api-error";
 import { CreateTicketInput, UpdateTicketInput, } from "../validators/ticket.validator";
 
+// export async function createTicket(data: CreateTicketInput) {
+//   const account = await prisma.account.findUnique({
+//     where: {
+//       id: data.accountId,
+//     },
+//   });
+
+//   if (!account) {
+//     throw new ApiError(404, "Account not found");
+//   }
+
+//   const contact = await prisma.contact.findUnique({
+//     where: {
+//       id: data.contactId,
+//     },
+//   });
+
+//   if (!contact) {
+//     throw new ApiError(404, "Contact not found");
+//   }
+
+//   if (data.assigneeId) {
+//     const assignee = await prisma.user.findUnique({
+//       where: {
+//         id: data.assigneeId,
+//       },
+//     });
+
+//     if (!assignee) {
+//       throw new ApiError(404, "Assignee not found");
+//     }
+//   }
+
+//  return prisma.ticket.create({
+//   data: {
+//     subject: data.subject,
+//     accountId: data.accountId,
+//     contactId: data.contactId,
+//     assigneeId: data.assigneeId,
+//     priority: data.priority,
+//   },
+//   include: {
+//     account: true,
+//     contact: true,
+//     assignee: {
+//       select: {
+//         id: true,
+//         name: true,
+//         email: true,
+//         role: true,
+//       },
+//     },
+//   },
+// });
+// }
+
+
+
 export async function createTicket(data: CreateTicketInput) {
   const account = await prisma.account.findUnique({
     where: {
@@ -23,8 +81,10 @@ export async function createTicket(data: CreateTicketInput) {
     throw new ApiError(404, "Contact not found");
   }
 
+  let assignee = null;
+
   if (data.assigneeId) {
-    const assignee = await prisma.user.findUnique({
+    assignee = await prisma.user.findUnique({
       where: {
         id: data.assigneeId,
       },
@@ -35,27 +95,42 @@ export async function createTicket(data: CreateTicketInput) {
     }
   }
 
- return prisma.ticket.create({
-  data: {
-    subject: data.subject,
-    accountId: data.accountId,
-    contactId: data.contactId,
-    assigneeId: data.assigneeId,
-    priority: data.priority,
-  },
-  include: {
-    account: true,
-    contact: true,
-    assignee: {
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
+  const ticket = await prisma.ticket.create({
+    data: {
+      subject: data.subject,
+      accountId: data.accountId,
+      contactId: data.contactId,
+      assigneeId: data.assigneeId,
+      priority: data.priority,
+    },
+    include: {
+      account: true,
+      contact: true,
+      assignee: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
       },
     },
-  },
-});
+  });
+
+  // Create a notification for the assigned agent.
+  if (assignee) {
+    await prisma.notification.create({
+      data: {
+        title: "New ticket assigned",
+        description: `Ticket #${ticket.id} — ${ticket.subject}`,
+        type: "TICKET_ASSIGNED",
+        userId: assignee.id,
+        ticketId: ticket.id,
+      },
+    });
+  }
+
+  return ticket;
 }
 
 
@@ -99,6 +174,32 @@ export async function getTickets(filters: {
   });
 }
 
+// export async function getTicketById(id: string) {
+//   const ticket = await prisma.ticket.findUnique({
+//     where: {
+//       id,
+//     },
+//     include: {
+//       account: true,
+//       contact: true,
+//       assignee: {
+//         select: {
+//           id: true,
+//           name: true,
+//           email: true,
+//           role: true,
+//         },
+//       },
+//     },
+//   });
+
+//   if (!ticket) {
+//     throw new ApiError(404, "Ticket not found");
+//   }
+
+//   return ticket;
+// }
+
 export async function getTicketById(id: string) {
   const ticket = await prisma.ticket.findUnique({
     where: {
@@ -122,11 +223,82 @@ export async function getTicketById(id: string) {
     throw new ApiError(404, "Ticket not found");
   }
 
-  return ticket;
+  const prevTickets = await prisma.ticket.findMany({
+    where: {
+      contactId: ticket.contactId,
+      NOT: {
+        id: ticket.id,
+      },
+    },
+    include: {
+      account: true,
+      contact: true,
+      assignee: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return {
+    ...ticket,
+    prevTickets,
+  };
 }
 
 
+// export async function updateTicket(
+//   id: string,
+//   data: UpdateTicketInput
+// ) {
+//   const existing = await prisma.ticket.findUnique({
+//     where: {
+//       id,
+//     },
+//   });
 
+//   if (!existing) {
+//     throw new ApiError(404, "Ticket not found");
+//   }
+
+//   if (data.assigneeId) {
+//     const assignee = await prisma.user.findUnique({
+//       where: {
+//         id: data.assigneeId,
+//       },
+//     });
+
+//     if (!assignee) {
+//       throw new ApiError(404, "Assignee not found");
+//     }
+//   }
+
+//   return prisma.ticket.update({
+//     where: {
+//       id,
+//     },
+//     data,
+//     include: {
+//       account: true,
+//       contact: true,
+//       assignee: {
+//         select: {
+//           id: true,
+//           name: true,
+//           email: true,
+//           role: true,
+//         },
+//       },
+//     },
+//   });
+// }
 export async function updateTicket(
   id: string,
   data: UpdateTicketInput
@@ -141,19 +313,22 @@ export async function updateTicket(
     throw new ApiError(404, "Ticket not found");
   }
 
+  let newAssignee = null;
+
+  // Only check the user when an assignee is being supplied.
   if (data.assigneeId) {
-    const assignee = await prisma.user.findUnique({
+    newAssignee = await prisma.user.findUnique({
       where: {
         id: data.assigneeId,
       },
     });
 
-    if (!assignee) {
+    if (!newAssignee) {
       throw new ApiError(404, "Assignee not found");
     }
   }
 
-  return prisma.ticket.update({
+  const updatedTicket = await prisma.ticket.update({
     where: {
       id,
     },
@@ -171,6 +346,25 @@ export async function updateTicket(
       },
     },
   });
+
+  // Create a notification only when the ticket
+  // gets assigned to a different user.
+  if (
+    newAssignee &&
+    newAssignee.id !== existing.assigneeId
+  ) {
+    await prisma.notification.create({
+      data: {
+        title: "New ticket assigned",
+        description: `Ticket #${updatedTicket.id} — ${updatedTicket.subject}`,
+        type: "TICKET_ASSIGNED",
+        userId: newAssignee.id,
+        ticketId: updatedTicket.id,
+      },
+    });
+  }
+
+  return updatedTicket;
 }
 
 export async function deleteTicket(id: string) {

@@ -5,7 +5,14 @@ export const createTicketSchema = z.object({
   contactId: z.string(),
   accountId: z.string(),
   assigneeId: z.string().optional(),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
+
+  status: z
+    .enum(["NEW", "IN_PROGRESS", "WAITING", "RESOLVED"])
+    .optional(),
+
+  priority: z
+    .enum(["LOW", "MEDIUM", "HIGH", "URGENT"])
+    .optional(),
 });
 
 export const updateTicketSchema = createTicketSchema.partial();

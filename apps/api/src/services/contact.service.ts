@@ -29,6 +29,9 @@ export async function createContact(data: CreateContactInput) {
 
   return prisma.contact.create({
     data,
+    include: {
+      account: true,
+    },
   });
 }
 

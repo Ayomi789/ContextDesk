@@ -11,6 +11,10 @@ import { notFound } from "./middleware/not-found";
 import { errorHandler } from "./middleware/error-handler";
 import contactRoutes from "./routes/contact.routes";
 import messageRoutes from "./routes/message.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
+import aiRoutes from "./routes/ai.routes";
+import userRoutes from "./routes/user.routes";
+import notificationRoutes from "./routes/notification.routes";
 
 
 
@@ -27,6 +31,10 @@ app.use("/api/v1/protected", protectedRoutes);
 app.use("/api/v1/tickets", ticketRoutes);
 app.use("/api/v1/contacts", contactRoutes);
 app.use("/api/v1/messages", messageRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/ai-draft", aiRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 // 404 handler
 app.use(notFound);
 
