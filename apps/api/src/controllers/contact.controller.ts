@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from "express";
+import { parsePagination } from "../utils/pagination.js";
 import {
   createContactSchema,
   updateContactSchema,
-} from "../validators/contact.validator";
+} from "../validators/contact.validator.js";
 
 import {
   createContact,
@@ -10,7 +11,7 @@ import {
   getContactById,
   updateContact,
   deleteContact,
-} from "../services/contact.service";
+} from "../services/contact.service.js";
 
 
 export async function create(
@@ -21,7 +22,10 @@ export async function create(
   try {
     const data = createContactSchema.parse(req.body);
 
-    const contact = await createContact(data);
+    const contact = await createContact(
+      data,
+      req.user.organizationId
+    );
 
     return res.status(201).json({
       success: true,
@@ -34,16 +38,26 @@ export async function create(
 
 
 export async function getAll(
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const contacts = await getContacts();
+    const pagination = parsePagination(
+      req.query as { page?: string; limit?: string }
+    );
+
+    const { contacts, total } = await getContacts(
+      req.user.organizationId,
+      { skip: pagination.skip, take: pagination.limit }
+    );
 
     return res.json({
       success: true,
       contacts,
+      total,
+      page: pagination.page,
+      limit: pagination.limit,
     });
   } catch (error) {
     next(error);
@@ -59,7 +73,10 @@ export async function getOne(
   next: NextFunction
 ) {
   try {
-    const contact = await getContactById(req.params.id);
+    const contact = await getContactById(
+      req.params.id as string,
+      req.user.organizationId
+    );
 
     return res.json({
       success: true,
@@ -80,7 +97,11 @@ export async function update(
   try {
     const data = updateContactSchema.parse(req.body);
 
-    const contact = await updateContact(req.params.id, data);
+    const contact = await updateContact(
+      req.params.id as string,
+      data,
+      req.user.organizationId
+    );
 
     return res.json({
       success: true,
@@ -98,7 +119,10 @@ export async function remove(
   next: NextFunction
 ) {
   try {
-    await deleteContact(req.params.id);
+    await deleteContact(
+      req.params.id as string,
+      req.user.organizationId
+    );
 
     return res.json({
       success: true,

@@ -31,12 +31,56 @@ enum TicketPriority {
   URGENT
 }
 
+model Organization {
+  id   String  @id @default(cuid())
+  name String
+  slug String @unique
+
+  users       User[]
+  accounts    Account[]
+  contacts    Contact[]
+  tickets     Ticket[]
+  invitations Invitation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invitation {
+  id String @id @default(cuid())
+
+  email     String
+  role      UserRole @default(AGENT)
+  tokenHash String   @unique
+
+  acceptedAt DateTime?
+  expiresAt  DateTime
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdById String
+
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
   email        String   @unique
-  passwordHash String
+  passwordHash String?
+  googleId     String?  @unique
   role         UserRole @default(AGENT)
+
+  emailVerified            Boolean   @default(false)
+  verificationCodeHash     String?
+  verificationCodeExpiresAt DateTime?
+  notificationPrefs        Json?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
   assignedTickets Ticket[]
 
@@ -45,6 +89,8 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 model Account {
@@ -53,11 +99,16 @@ model Account {
   domain String @unique
   tier   String
 
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
   contacts Contact[]
   tickets  Ticket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 model Contact {
@@ -69,10 +120,15 @@ model Contact {
   accountId String
   account   Account @relation(fields: [accountId], references: [id])
 
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
   tickets Ticket[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 model Ticket {
@@ -81,11 +137,17 @@ model Ticket {
 
   status   TicketStatus   @default(NEW)
   priority TicketPriority @default(MEDIUM)
+  slaDueAt  DateTime?
+
+  triageReason String?
 
   contactId String
   accountId String
 
   assigneeId String?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
   contact Contact @relation(fields: [contactId], references: [id])
   account Account @relation(fields: [accountId], references: [id])
@@ -97,6 +159,8 @@ model Ticket {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 model Message {
@@ -112,11 +176,6 @@ model Message {
   author         User?             @relation(fields: [authorId], references: [id])
 
   createdAt      DateTime          @default(now())
-}
-
-model Tag {
-  id    String @id @default(cuid())
-  label String @unique
 }
 
 model Notification {

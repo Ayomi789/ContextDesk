@@ -1,56 +1,13 @@
-// import { Request, Response, NextFunction } from "express";
-// import { createMessageSchema } from "../validators/message.validator";
-// import { createMessage, getMessagesByTicket, } from "../services/message.service";
-
-// export async function create(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) {
-//   try {
-//     const data = createMessageSchema.parse(req.body);
-
-//     const message = await createMessage(
-//             data,
-//             req.user.userId
-//     );
-
-//     return res.status(201).json({
-//       success: true,
-//       message,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
-// export async function getByTicket(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) {
-//   try {
-//     const messages = await getMessagesByTicket(req.params.ticketId);
-
-//     return res.json({
-//       success: true,
-//       messages,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// }
-
-
 import { Request, Response, NextFunction } from "express";
+import { parsePagination } from "../utils/pagination.js";
 import {
   createMessageSchema,
-} from "../validators/message.validator";
+} from "../validators/message.validator.js";
 import {
   createMessage,
+  createCustomerMessage,
   getMessagesByTicket,
-} from "../services/message.service";
+} from "../services/message.service.js";
 
 
 
@@ -69,7 +26,8 @@ export async function create(
         ...data,
         senderType: "AGENT",
       },
-      req.user.userId
+      req.user.userId,
+      req.user.organizationId
     );
 
     return res.status(201).json({
@@ -87,13 +45,22 @@ export async function getByTicket(
   next: NextFunction
 ) {
   try {
-    const messages = await getMessagesByTicket(
-      req.params.ticketId
+    const pagination = parsePagination(
+      req.query as { page?: string; limit?: string }
+    );
+
+    const { messages, total } = await getMessagesByTicket(
+      req.params.ticketId as string,
+      req.user.organizationId,
+      { skip: pagination.skip, take: pagination.limit }
     );
 
     return res.json({
       success: true,
       messages,
+      total,
+      page: pagination.page,
+      limit: pagination.limit,
     });
   } catch (error) {
     next(error);
@@ -108,10 +75,13 @@ export async function createCustomer(
   try {
     const data = createMessageSchema.parse(req.body);
 
-    const message = await createCustomerMessage({
-      ...data,
-      senderType: "CUSTOMER",
-    });
+    const message = await createCustomerMessage(
+      {
+        ...data,
+        senderType: "CUSTOMER",
+      },
+      req.user.organizationId
+    );
 
     return res.status(201).json({
       success: true,

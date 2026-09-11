@@ -11,16 +11,22 @@ An AI-powered CRM ticketing platform that combines customer support and CRM into
 - PostgreSQL
 - Prisma
 - Tailwind CSS
-- Anthropic Claude
+- NVIDIA (GPT-OSS 20B, for AI reply drafts)
 
 ## Project Structure
 
 apps/
-- web
-- api
+- api — Express + Prisma backend
 
 packages/
-- shared-types
+- shared-types — contracts shared with frontends
+
+The maintained React frontend lives outside this repo (see docs/SETUP.md).
+
+## Docs
+
+- [Setup](docs/SETUP.md) — install, env, seed, first ADMIN, Docker
+- [API reference](docs/API.md) — endpoints, errors, SLA, RBAC
 
 ## Status
 

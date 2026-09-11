@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import type { UserRole } from "@contextdesk/shared-types";
 
 declare global {
   namespace Express {
@@ -6,6 +6,7 @@ declare global {
       user: {
         userId: string;
         role: UserRole;
+        organizationId: string;
       };
     }
   }

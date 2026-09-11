@@ -8,10 +8,11 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "echo \"Apps not scaffolded yet\"",
-    "build": "echo \"Build script coming soon\"",
-    "lint": "echo \"Lint script coming soon\"",
-    "format": "echo \"Format script coming soon\""
+    "dev": "npm run dev --workspace=api",
+    "build": "npm run build --workspace=api",
+    "seed": "npm run seed --workspace=api",
+    "start": "npm run start --workspace=api",
+    "test": "npm run test --workspace=api"
   },
   "keywords": [
     "crm",

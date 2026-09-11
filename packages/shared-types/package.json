@@ -1,0 +1,17 @@
+{
+  "name": "@contextdesk/shared-types",
+  "version": "1.0.0",
+  "description": "Shared contracts between the ContextDesk API and frontends",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "MIT"
+}

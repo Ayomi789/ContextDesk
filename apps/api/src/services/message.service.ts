@@ -1,250 +1,16 @@
-// import { prisma } from "../lib/prisma";
-// import { ApiError } from "../utils/api-error";
-// import { CreateMessageInput } from "../validators/message.validator";
-
-// export async function createMessage(
-//   data: CreateMessageInput,
-//   authorId: string
-// ) {
-//   const ticket = await prisma.ticket.findUnique({
-//     where: {
-//       id: data.ticketId,
-//     },
-//   });
-
-//   if (!ticket) {
-//     throw new ApiError(404, "Ticket not found");
-//   }
-
-//   const message = await prisma.message.create({
-//     data: {
-//       ...data,
-//       authorId,
-//     },
-//     include: {
-//       author: {
-//         select: {
-//           id: true,
-//           name: true,
-//           email: true,
-//           role: true,
-//         },
-//       },
-//       ticket: true,
-//     },
-//   });
-
-//   // Public replies notify the ticket assignee.
-//   // Internal notes do not create notifications.
-//   if (
-//     !data.isInternalNote &&
-//     ticket.assigneeId &&
-//     ticket.assigneeId !== authorId
-//   ) {
-//     await prisma.notification.create({
-//       data: {
-//         title: "Customer replied",
-//         description: `Customer replied to Ticket #${ticket.id} — ${ticket.subject}`,
-//         type: "CUSTOMER_REPLIED",
-//         userId: ticket.assigneeId,
-//         ticketId: ticket.id,
-//       },
-//     });
-//   }
-
-//   return message;
-// }
-
-// export async function getMessagesByTicket(ticketId: string) {
-//   const ticket = await prisma.ticket.findUnique({
-//     where: {
-//       id: ticketId,
-//     },
-//   });
-
-//   if (!ticket) {
-//     throw new ApiError(404, "Ticket not found");
-//   }
-
-//   return prisma.message.findMany({
-//     where: {
-//       ticketId,
-//     },
-//     include: {
-//       author: {
-//         select: {
-//           id: true,
-//           name: true,
-//           email: true,
-//           role: true,
-//         },
-//       },
-//     },
-//     orderBy: {
-//       createdAt: "asc",
-//     },
-//   });
-// }
-
-
-// import { prisma } from "../lib/prisma";
-// import { ApiError } from "../utils/api-error";
-// import { CreateMessageInput } from "../validators/message.validator";
-
-// export async function createMessage(
-//   data: CreateMessageInput,
-//   authorId: string
-// ) {
-//   const ticket = await prisma.ticket.findUnique({
-//     where: {
-//       id: data.ticketId,
-//     },
-//   });
-
-//   if (!ticket) {
-//     throw new ApiError(404, "Ticket not found");
-//   }
-
-//   const senderType = data.senderType ?? "AGENT";
-
-//   // Agent messages must have an authenticated CRM user.
-//   if (senderType === "AGENT" && !authorId) {
-//     throw new ApiError(401, "Agent author is required");
-//   }
-
-//   const message = await prisma.message.create({
-//     data: {
-//       body: data.body,
-//       ticketId: data.ticketId,
-//       isInternalNote: data.isInternalNote ?? false,
-//       senderType,
-//       authorId: senderType === "AGENT" ? authorId : null,
-//     },
-//     include: {
-//       author: {
-//         select: {
-//           id: true,
-//           name: true,
-//           email: true,
-//           role: true,
-//         },
-//       },
-//       ticket: true,
-//     },
-//   });
-
-//   // Customer replies notify the assigned agent.
-//   if (
-//     senderType === "CUSTOMER" &&
-//     ticket.assigneeId
-//   ) {
-//     await prisma.notification.create({
-//       data: {
-//         title: "Customer replied",
-//         description: `Customer replied to Ticket #${ticket.id} — ${ticket.subject}`,
-//         type: "CUSTOMER_REPLIED",
-//         userId: ticket.assigneeId,
-//         ticketId: ticket.id,
-//       },
-//     });
-//   }
-
-//   return message;
-// }
-
-// export async function getMessagesByTicket(ticketId: string) {
-//   const ticket = await prisma.ticket.findUnique({
-//     where: {
-//       id: ticketId,
-//     },
-//   });
-
-//   if (!ticket) {
-//     throw new ApiError(404, "Ticket not found");
-//   }
-
-//   return prisma.message.findMany({
-//     where: {
-//       ticketId,
-//     },
-//     include: {
-//       author: {
-//         select: {
-//           id: true,
-//           name: true,
-//           email: true,
-//           role: true,
-//         },
-//       },
-//     },
-//     orderBy: {
-//       createdAt: "asc",
-//     },
-//   });
-// }
-
-
-// export async function createCustomerMessage(
-//   data: CreateMessageInput
-// ) {
-//   const ticket = await prisma.ticket.findUnique({
-//     where: {
-//       id: data.ticketId,
-//     },
-//   });
-
-//   if (!ticket) {
-//     throw new ApiError(404, "Ticket not found");
-//   }
-
-//   const message = await prisma.message.create({
-//     data: {
-//       body: data.body,
-//       ticketId: data.ticketId,
-//       senderType: "CUSTOMER",
-//       isInternalNote: false,
-//       authorId: null,
-//     },
-//     include: {
-//       author: {
-//         select: {
-//           id: true,
-//           name: true,
-//           email: true,
-//           role: true,
-//         },
-//       },
-//       ticket: true,
-//     },
-//   });
-
-//   if (ticket.assigneeId) {
-//     await prisma.notification.create({
-//       data: {
-//         title: "Customer replied",
-//         description: `Customer replied to Ticket #${ticket.id} — ${ticket.subject}`,
-//         type: "CUSTOMER_REPLIED",
-//         userId: ticket.assigneeId,
-//         ticketId: ticket.id,
-//       },
-//     });
-//   }
-
-//   return message;
-// }
-
-
-import { prisma } from "../lib/prisma";
-import { ApiError } from "../utils/api-error";
-import { CreateMessageInput } from "../validators/message.validator";
+import { prisma } from "../lib/prisma.js";
+import { ApiError } from "../utils/api-error.js";
+import { CreateMessageInput } from "../validators/message.validator.js";
 
 export async function createMessage(
   data: CreateMessageInput,
-  authorId: string
+  authorId: string,
+  organizationId: string
 ) {
-  const ticket = await prisma.ticket.findUnique({
+  const ticket = await prisma.ticket.findFirst({
     where: {
       id: data.ticketId,
+      organizationId,
     },
     select: {
       id: true,
@@ -306,10 +72,19 @@ export async function createMessage(
   return result;
 }
 
-export async function getMessagesByTicket(ticketId: string) {
-  const ticket = await prisma.ticket.findUnique({
+export async function createCustomerMessage(
+  data: CreateMessageInput,
+  organizationId: string
+) {
+  const ticket = await prisma.ticket.findFirst({
     where: {
-      id: ticketId,
+      id: data.ticketId,
+      organizationId,
+    },
+    select: {
+      id: true,
+      subject: true,
+      assigneeId: true,
     },
   });
 
@@ -317,9 +92,13 @@ export async function getMessagesByTicket(ticketId: string) {
     throw new ApiError(404, "Ticket not found");
   }
 
-  return prisma.message.findMany({
-    where: {
-      ticketId,
+  const message = await prisma.message.create({
+    data: {
+      body: data.body,
+      ticketId: data.ticketId,
+      isInternalNote: false,
+      senderType: "CUSTOMER",
+      authorId: null,
     },
     include: {
       author: {
@@ -330,9 +109,64 @@ export async function getMessagesByTicket(ticketId: string) {
           role: true,
         },
       },
-    },
-    orderBy: {
-      createdAt: "asc",
+      ticket: true,
     },
   });
+
+  if (ticket.assigneeId) {
+    await prisma.notification.create({
+      data: {
+        title: "Customer replied",
+        description: `Customer replied to "${ticket.subject}".`,
+        type: "CUSTOMER_REPLIED",
+        userId: ticket.assigneeId,
+        ticketId: ticket.id,
+      },
+    });
+  }
+
+  return message;
+}
+
+export async function getMessagesByTicket(
+  ticketId: string,
+  organizationId: string,
+  pagination?: { skip: number; take: number }
+) {
+  const ticket = await prisma.ticket.findFirst({
+    where: {
+      id: ticketId,
+      organizationId,
+    },
+  });
+
+  if (!ticket) {
+    throw new ApiError(404, "Ticket not found");
+  }
+
+  const where = { ticketId };
+
+  const [messages, total] = await Promise.all([
+    prisma.message.findMany({
+      where,
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      skip: pagination?.skip,
+      take: pagination?.take,
+    }),
+    prisma.message.count({ where }),
+  ]);
+
+  return { messages, total };
 }

@@ -1,14 +1,15 @@
 import jwt from "jsonwebtoken";
-import { env } from "../config/env";
+import { env } from "../config/env.js";
 
 type JwtPayload = {
   userId: string;
   role: string;
+  organizationId: string;
 };
 
 export function generateToken(payload: JwtPayload) {
   return jwt.sign(payload, env.JWT_SECRET, {
-    expiresIn: env.JWT_EXPIRES_IN,
+    expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions["expiresIn"],
   });
 }
 

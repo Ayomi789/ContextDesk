@@ -1,22 +1,16 @@
 import { NextFunction, Request, Response } from "express";
-// import { createAccountSchema } from "../validators/account.validator";
-// import {
-//   createAccount,
-//   getAccounts,
-// } from "../services/account.service";
-
-
+import { parsePagination } from "../utils/pagination.js";
 import {
   createAccount,
   getAccounts,
   updateAccount,
   deleteAccount,
-} from "../services/account.service";
+} from "../services/account.service.js";
 
 import {
   createAccountSchema,
   updateAccountSchema,
-} from "../validators/account.validator";
+} from "../validators/account.validator.js";
 
 
 
@@ -28,7 +22,10 @@ export async function create(
   try {
     const data = createAccountSchema.parse(req.body);
 
-    const account = await createAccount(data);
+    const account = await createAccount(
+      data,
+      req.user.organizationId
+    );
 
     return res.status(201).json({
       success: true,
@@ -45,11 +42,21 @@ export async function getAll(
   next: NextFunction
 ) {
   try {
-    const accounts = await getAccounts();
+    const pagination = parsePagination(
+      req.query as { page?: string; limit?: string }
+    );
+
+    const { accounts, total } = await getAccounts(
+      req.user.organizationId,
+      { skip: pagination.skip, take: pagination.limit }
+    );
 
     return res.status(200).json({
       success: true,
       accounts,
+      total,
+      page: pagination.page,
+      limit: pagination.limit,
     });
   } catch (error) {
     next(error);
@@ -65,7 +72,11 @@ export async function update(
   try {
     const data = updateAccountSchema.parse(req.body);
 
-    const account = await updateAccount(req.params.id, data);
+    const account = await updateAccount(
+      req.params.id as string,
+      data,
+      req.user.organizationId
+    );
 
     return res.status(200).json({
       success: true,
@@ -82,7 +93,10 @@ export async function remove(
   next: NextFunction
 ) {
   try {
-    await deleteAccount(req.params.id);
+    await deleteAccount(
+      req.params.id as string,
+      req.user.organizationId
+    );
 
     return res.status(200).json({
       success: true,

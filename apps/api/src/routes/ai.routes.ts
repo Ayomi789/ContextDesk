@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { authenticate } from "../middleware/auth.middleware";
-import { prisma } from "../lib/prisma";
-import { generateTicketDraft } from "../services/ai.service";
+import { authenticate } from "../middleware/auth.middleware.js";
+import { prisma } from "../lib/prisma.js";
+import { generateTicketDraft } from "../services/ai.service.js";
 
 const router = Router();
 
@@ -16,9 +16,10 @@ router.post("/", authenticate, async (req, res, next) => {
       });
     }
 
-    const ticket = await prisma.ticket.findUnique({
+    const ticket = await prisma.ticket.findFirst({
       where: {
         id: ticketId,
+        organizationId: req.user.organizationId,
       },
       include: {
         contact: true,
