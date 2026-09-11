@@ -65,7 +65,15 @@ SEED_ADMIN_EMAIL=you@example.com SEED_ADMIN_PASSWORD='...' npm run seed
 Admins can `DELETE` tickets/contacts/accounts and `PATCH /users/:id/role`.
 Everything else is open to any authenticated agent.
 
-## Docker
+## Deploy (Render)
+
+Push to GitHub, then Render → New → Blueprint → this repo
+(`render.yaml` builds the Dockerfile, runs migrations, and
+health-checks `/api/v1/health`). Fill the prompted env vars —
+`DATABASE_URL` (Neon), `FRONTEND_URL` (your deployed frontend origin),
+plus the NVIDIA/SMTP/Google keys. Free tier sleeps when idle.
+
+## Docker (local)
 
 ```bash
 docker build -t contextdesk-api .

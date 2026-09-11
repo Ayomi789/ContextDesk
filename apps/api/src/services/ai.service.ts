@@ -118,6 +118,7 @@ Reply with ONLY this JSON, no other text:
           temperature: 0,
           max_tokens: 150,
         }),
+        signal: AbortSignal.timeout(20000),
       }
     );
   } catch {
@@ -128,13 +129,18 @@ Reply with ONLY this JSON, no other text:
     return null;
   }
 
-  const data = (await response.json()) as {
+  let data: {
     choices?: {
       message?: {
         content?: string;
       };
     }[];
   };
+  try {
+    data = (await response.json()) as typeof data;
+  } catch {
+    return null;
+  }
 
   const content = data.choices?.[0]?.message?.content?.trim();
 
@@ -215,6 +221,7 @@ Rules:
         temperature: 0.4,
         max_tokens: 400,
       }),
+      signal: AbortSignal.timeout(30000),
     }
   );
 

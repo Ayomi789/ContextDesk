@@ -1,0 +1,43 @@
+# Render blueprint for the ContextDesk API.
+#
+# 1. Push this repo to GitHub.
+# 2. Render dashboard → New → Blueprint → select the repo.
+# 3. Fill the `sync: false` values when prompted (or later under
+#    Environment). DATABASE_URL is your Neon connection string.
+# 4. Deploy. Migrations run automatically before each deploy via
+#    preDeployCommand. If a deploy ever complains about that step,
+#    run it once from the service's Shell tab instead:
+#      npx prisma migrate deploy
+
+services:
+  - type: web
+    name: contextdesk-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/v1/health
+    preDeployCommand: npx prisma migrate deploy
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: NVIDIA_MODEL
+        value: openai/gpt-oss-20b
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: SMTP_HOST
+        value: smtp-relay.brevo.com
+      - key: SMTP_PORT
+        value: 2525
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
