@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma.js";
 import { ApiError } from "../utils/api-error.js";
 import type { UserRole } from "@contextdesk/shared-types";
 import { sendInvitation } from "./mail.service.js";
+import { checkSeatLimit } from "./billing.service.js";
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -34,6 +35,8 @@ export async function createInvitation(
       "User is already a member of this organization"
     );
   }
+
+  await checkSeatLimit(organizationId);
 
   const token = randomBytes(32).toString("hex");
 

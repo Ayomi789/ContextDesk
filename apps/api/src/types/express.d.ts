@@ -8,6 +8,7 @@ declare global {
         role: UserRole;
         organizationId: string;
       };
+      rawBody?: Buffer;
     }
   }
 }

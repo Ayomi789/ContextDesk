@@ -9,6 +9,7 @@ import {
   CreateTicketInput,
   UpdateTicketInput,
 } from "../validators/ticket.validator.js";
+import { checkTicketLimit } from "./billing.service.js";
 
 /**
  * Default SLA duration by ticket priority.
@@ -152,6 +153,8 @@ export async function createTicket(
       "Contact does not belong to account"
     );
   }
+
+  await checkTicketLimit(organizationId);
 
   let assignee = null;
 

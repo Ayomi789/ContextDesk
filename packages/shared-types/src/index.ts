@@ -51,6 +51,29 @@ export interface Invitation {
   createdAt: string;
 }
 
+export type Plan = "FREE" | "STARTER" | "PRO" | "ENTERPRISE";
+
+export type SubscriptionStatus =
+  | "TRIALING"
+  | "ACTIVE"
+  | "PAST_DUE"
+  | "CANCELED";
+
+export interface Subscription {
+  id?: string;
+  plan: Plan;
+  status: SubscriptionStatus;
+  currentPeriodEnd?: string | null;
+  organizationId: string;
+}
+
+export interface BillingUsage {
+  seatsUsed: number;
+  seatsLimit: number | null;
+  ticketsThisMonth: number;
+  ticketsLimit: number | null;
+}
+
 export interface CrmUser {
   id: string;
   name: string;

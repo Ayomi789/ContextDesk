@@ -112,6 +112,28 @@ deadline) · `BREACHED` (deadline passed) · `AT_RISK` (≤ 2h remain) ·
   only; the model is instructed not to invent facts and never to mention it
   is AI. Note: role changes take effect on next login (roles live in the JWT).
 
+## Billing — `/billing` (Paystack)
+
+- `GET /billing/status` — **ADMIN only**. Current plan/status plus
+  usage (`seatsUsed/seatsLimit`, `ticketsThisMonth/ticketsLimit`).
+  Orgs without a subscription row default to STARTER.
+- `POST /billing/initialize` `{ plan: "STARTER" | "PRO" }` —
+  **ADMIN only**. Returns `{ authorization_url, reference }`; the
+  frontend redirects there, Paystack calls back to `/billing/callback`,
+  which `POST /billing/verify { reference }` confirms (checks the
+  payment belongs to the org). ENTERPRISE has no checkout.
+- `POST /billing/webhook` — public, Paystack-signed (HMAC-SHA512 over
+  the raw body). Handles `subscription.create` (activate),
+  `invoice.payment_failed` (past-due), `subscription.not_renew` /
+  `disable` (cancel; disable drops to STARTER). Unknown customers are
+  ignored, bad signatures 401.
+- Enforcement: Free = 3 seats, 100 tickets/month; Starter = 10
+  seats, 10,000 tickets/month. New orgs start on Free. Over-limit
+  invites and ticket creates fail with **402** and an upgrade message.
+  Pro/Enterprise are unlimited. `PAST_DUE` and `CANCELED` subscriptions
+  fall back to Free limits immediately — limits are re-evaluated on
+  every request, so upgrades apply with no re-login.
+
 ## Users — `/users`
 
 - `GET /users` → `{ users }` (own org members only; used for assignee

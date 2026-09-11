@@ -19,6 +19,7 @@ import userRoutes from "./routes/user.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import invitationRoutes from "./routes/invitation.routes.js";
 import intakeRoutes from "./routes/intake.routes.js";
+import billingRoutes from "./routes/billing.routes.js";
 
 
 
@@ -40,7 +41,14 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.use(express.json({ limit: "1mb" }));
+app.use(
+  express.json({
+    limit: "1mb",
+    verify: (req: any, _res, buf) => {
+      req.rawBody = Buffer.from(buf);
+    },
+  })
+);
 
 // API v1 routes
 app.use("/api/v1/health", healthRoutes);
@@ -56,6 +64,7 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/invitations", invitationRoutes);
 app.use("/api/v1/intake", intakeRoutes);
+app.use("/api/v1/billing", billingRoutes);
 // 404 handler
 app.use(notFound);
 
