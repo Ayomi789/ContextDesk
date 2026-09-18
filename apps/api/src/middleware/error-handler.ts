@@ -53,7 +53,10 @@ export function errorHandler(
   }
 
   // Only unexpected errors get logged
-  console.error(err);
+  console.error(`[500] ${err.name}: ${err.message}`);
+  if (process.env.NODE_ENV !== "production") {
+    console.error(err.stack);
+  }
 
   return res.status(500).json({
     success: false,
