@@ -52,6 +52,18 @@ export function errorHandler(
     });
   }
 
+  if (
+    err.name === "PrismaClientInitializationError" ||
+    err.name === "PrismaClientRustPanicError" ||
+    err.name === "PrismaClientUnknownRequestError"
+  ) {
+    console.error(`[500] DB Error: ${err.name}: ${err.message}`);
+    return res.status(503).json({
+      success: false,
+      message: "Database unavailable, please try again shortly",
+    });
+  }
+
   // Only unexpected errors get logged
   console.error(`[500] ${err.name}: ${err.message}`);
   if (process.env.NODE_ENV !== "production") {
