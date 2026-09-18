@@ -2,7 +2,7 @@ import { TicketPriority } from "@prisma/client";
 import { env } from "../config/env.js";
 
 const AI_MODEL =
-  process.env.NVIDIA_MODEL || "openai/gpt-oss-20b";
+  process.env.NVIDIA_MODEL || "nvidia/nemotron-3-nano-30b-a3b";
 
 const TRIAGE_PRIORITIES: TicketPriority[] = [
   "LOW",
